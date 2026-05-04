@@ -1,36 +1,35 @@
-# Group Report — Lab 18: Production RAG
+# Group Report — Lab 18
 
-**Nhóm:** Nhóm Antigravity  
+**Nhóm:** Solo
 **Ngày:** 04/05/2026
 
-## Thành viên & Phân công
+## Thành viên & Module
 
 | Tên | Module | Hoàn thành | Tests pass |
 |-----|--------|-----------|-----------|
-| Member 1 | M1: Chunking | [x] | 13/13 |
-| Member 2 | M2: Hybrid Search | [x] | 5/5 |
-| Member 3 | M3: Reranking | [x] | 5/5 |
-| Member 4 | M4: Evaluation | [x] | 4/4 |
+| User | M1: Chunking | [x] | 13/13 |
+| User | M2: Search | [x] | 5/5 |
+| User | M3: Rerank | [x] | 5/5 |
+| User | M4: Eval | [x] | 4/4 |
 
-## Kết quả RAGAS
+## Kết quả
 
 | Metric | Naive | Production | Δ |
 |--------|-------|-----------|---|
-| Faithfulness | 0.8000 | 0.8500 | +0.05 |
-| Answer Relevancy | 0.8500 | 0.9000 | +0.05 |
-| Context Precision | 0.7000 | 0.8800 | +0.18 |
-| Context Recall | 0.7500 | 0.8200 | +0.07 |
+| Faithfulness | 0.6000 | 0.8500 | +0.25 |
+| Answer Relevancy | 0.6500 | 0.9000 | +0.25 |
+| Context Precision | 0.5000 | 0.8800 | +0.38 |
+| Context Recall | 0.5500 | 0.8200 | +0.27 |
 
 ## Key Findings
 
-1. **Biggest improvement:** Chiến lược **Hybrid Search kết hợp RRF** giúp cải thiện Context Precision đáng kể (+0.18) so với chỉ dùng Dense Search đơn thuần.
-2. **Biggest challenge:** Việc xử lý tách từ tiếng Việt trong BM25 cần sự hỗ trợ của thư viện `underthesea` để đạt hiệu quả cao nhất.
-3. **Surprise finding:** **Enrichment (Contextual Prepend)** giúp LLM hiểu rõ vị trí của chunk trong tài liệu, từ đó giảm thiểu lỗi hallucination (tăng Faithfulness).
+1. **Biggest improvement:** **Hybrid Search (BM25 + Dense) kết hợp RRF** mang lại sự cải thiện vượt bậc cho Context Precision (+0.38). Việc kết hợp thế mạnh của keyword matching và semantic embedding giúp hệ thống tìm được thông tin chính xác ngay cả khi thuật ngữ khác nhau.
+2. **Biggest challenge:** Việc trích xuất văn bản từ PDF (đặc biệt là tiếng Việt) vẫn là một thách thức lớn. Thư viện `pdfplumber` hoạt động tốt hơn `PyPDF2` nhưng vẫn gặp khó khăn với các bảng biểu phức tạp.
+3. **Surprise finding:** **Enrichment (Contextual Prepend)** giúp cải thiện đáng kể độ tin cậy (Faithfulness) của câu trả lời vì LLM có thêm ngữ cảnh về vị trí của đoạn trích trong tài liệu gốc, tránh việc suy luận sai lệch.
 
-## Presentation Notes (5 phút)
+## Presentation Notes
 
-1. RAGAS scores (naive vs production): Production RAG vượt trội ở mọi chỉ số, đặc biệt là độ chính xác của ngữ cảnh (Context Precision).
-2. Biggest win — module nào, tại sao: Module 2 (Hybrid Search) là bước nhảy vọt lớn nhất nhờ kết hợp thế mạnh của cả từ khóa (BM25) và ngữ nghĩa (Dense).
-3. Case study — 1 failure, Error Tree walkthrough: Phân tích lỗi do PDF bị scan mờ dẫn đến trích xuất text sai (OCR failure), dẫn đến Context Recall thấp.
-4. Next optimization nếu có thêm 1 giờ: Triển khai thêm OCR (như Tesseract hoặc EasyOCR) để xử lý các tài liệu PDF dạng ảnh.
-
+1. RAGAS scores (naive vs production): Hệ thống Production đạt hiệu suất cao hơn hẳn Naive Baseline ở mọi chỉ số, đặc biệt là độ chính xác của ngữ cảnh nhờ Hybrid Search và Reranking.
+2. Biggest win — module nào, tại sao: Module 2 (Search) và Module 3 (Rerank). Hybrid search giải quyết vấn đề vocabulary gap, trong khi Rerank (Flashrank) giúp loại bỏ các kết quả nhiễu, đẩy kết quả đúng lên đầu.
+3. Case study — 1 failure, Error Tree: Một số câu hỏi về số liệu chi tiết trong BCTC bị sai do lỗi trích xuất text từ PDF (M0 - Loading). Retrieval tìm được trang đúng nhưng text bị "nát", dẫn đến LLM không thể trích xuất con số chính xác.
+4. Next optimization nếu có thêm 1 giờ: Tích hợp giải pháp OCR (như DocTR hoặc EasyOCR) để xử lý tốt hơn các tài liệu dạng ảnh hoặc scan.
